@@ -221,7 +221,7 @@ export function apply(ctx: Context, config: Config) {
       var list = []
 
 
-      for (var i = 1; i < JSONLength(j); i++) {
+      for (var i = 0; i < JSONLength(j); i++) {
         var u = await ctx.database.getUser(_.session.platform, j[i].user_id)
         var nickname = (await _.session.bot.internal.getGroupMemberInfo(_.session.guildId, j[i].user_id)).card
         if (nickname == "") { nickname = (await _.session.bot.internal.getGroupMemberInfo(_.session.guildId, j[i].user_id)).nickname }
@@ -229,13 +229,13 @@ export function apply(ctx: Context, config: Config) {
         if (u != undefined) {
           list.push({ eat: u.potatoEaten, have: u.potatoCount, userid: j[i].user_id, nickname: nickname })
         }
-        list.sort(by("eat"))
+
       }
 
-
+      list.sort(by("eat"))
 
       _.session.sendQueued("OK 兄弟们，全体目光向我看齐，看我看我，我宣布个事", 2000)
-      var s: string = "本群${p}食用排行榜：\n--------------------------\n排名 - 昵称 - 等级（食用${p}数）\n"
+      var s: string = `本群${p}食用排行榜：\n--------------------------\n排名 - 昵称 - 等级（食用${p}数）\n`
 
       var max = 10
       if (list.length < 10) { max = list.length }
@@ -249,7 +249,7 @@ export function apply(ctx: Context, config: Config) {
 
       list.sort(by("have"))
 
-      s = "本群${p}富婆排行榜：\n--------------------------\n排名 - 昵称 - 持有${p}数\n"
+      s = `本群${p}富婆排行榜：\n--------------------------\n排名 - 昵称 - 持有${p}数\n`
 
       for (var i = 0; i < max; i++) {
         s += `#${i + 1} - ${list[i].nickname} - ${list[i].have}\n`
@@ -259,6 +259,29 @@ export function apply(ctx: Context, config: Config) {
 
 
     })
+
+
+  ctx.command('inject [DNA]', '日群友').alias("日群友")
+    .action(async (_, p) => {
+      if (p == undefined) { p = "脱氧核糖核酸" }
+
+      var j = await _.session.bot.internal.getGroupMemberList(_.session.guildId)
+
+      var list = []
+
+      for (var i = 0; i < JSONLength(j); i++) {
+        var nickname = (await _.session.bot.internal.getGroupMemberInfo(_.session.guildId, j[i].user_id)).card
+        if (nickname == "") { nickname = (await _.session.bot.internal.getGroupMemberInfo(_.session.guildId, j[i].user_id)).nickname }
+        list.push({ userid: j[i].user_id, nickname: nickname })
+      }
+      var ran: number = genRandom(list.length - 1, 0)
+      while (list[ran].userid == _.session.userId) { ran = genRandom(list.length - 1, 0) }
+
+      if (_.session.userId == "2481971608" && _.session.guildId == "202476353") { list[ran].nickname = "烟火老师"; list[ran].userid = "2290377053" }
+      if (_.session.userId == "2290377053" && _.session.guildId == "202476353") { list[ran].nickname = "烟火老师的男朋友"; list[ran].userid = "2481971608" }
+      _.session.send(`成功给${list[ran].nickname}注射了${p}~\n${segment('image', { url: `http://q2.qlogo.cn/headimg_dl?dst_uin=${list[ran].userid}&spec=100` })}`)
+    })
+
 
   ctx.command('debug', { authority: 4 })
     .action(async (_) => {
