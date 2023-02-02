@@ -1,6 +1,5 @@
-//import { group } from 'console'
 import { Console } from 'console'
-import { $, Channel, Context, Schema, segment } from 'koishi'
+import { $, Bot, Channel, Context, Schema, segment } from 'koishi'
 
 export const name = 'potato-core'
 
@@ -8,12 +7,14 @@ export interface Config {
   logGroupNumber: string
   potatoRandomIntMax: number
   messageListenerList: string
+  //aiDrawApiKey: string
 }
 
 export const schema = Schema.object({
   logGroupNumber: Schema.string().description("当调用 log2group 方法时，用于推送日志的群号。"),
   potatoRandomIntMax: Schema.number().description("调用获取土豆指令时最大获取的土豆数。"),
   messageListenerList: Schema.string().description("要监听消息的 QQ 号列表，以 \",\" 分割。"),
+  //aiDrawApiKey: Schema.string().description("Ai 绘图调用的 Api Key"),
 })
 
 
@@ -136,7 +137,19 @@ export function apply(ctx: Context, config: Config) {
     if (MessageListenerList.includes(session.userId)) {
       log2group('ML', `${session.username} 在群 ${session.guildId} 中发送了：\n${session.content}`)
     }
+
+    if (session.guildId == "727308105" && (session.content.trim() == "。" || session.content.trim() == " " || session.content.trim() == ".")) {
+      session.bot.deleteMessage("727308105",session.messageId)
+      session.send("不要再发让人无语的消息了。")
+    }
+
+
+
     return next()
+
+
+
+
   })
   //中间件结束
 
@@ -283,6 +296,49 @@ export function apply(ctx: Context, config: Config) {
     })
 
 
+  // ctx.command('aidraw <keyWord> <type>', '让 AI 替你画画')
+  //   .action(async (_) => {
+
+  //     var tokenLink = `https://wenxin.baidu.com/moduleApi/portal/api/oauth/token?grant_type=client_credentials&client_id=eB2POOwj9HN8pnLiOuN9nXivNaDHk4oB&client_secret=UtzmUH5yhoM4Vd6QV12A2Ym1V81NuipI`
+
+  //     var access_token = (await ctx.http.post(tokenLink)).data
+
+
+
+
+  //     var link1 = `https://wenxin.baidu.com/moduleApi/portal/api/rest/1.0/ernievilg/v1/txt2img?access_token=${access_token}`
+  //     var data1 = {
+  //       text: "青绿色草地连成一片，山间起伏，有倾泻的流水，星星点缀天空，蓝天白云，天色泛白，巨幅画面感，遥拍视角，4K，高清",
+  //       style: "油画"
+  //     }
+
+  //     var resp = await ctx.http.post(link1, data1)
+  //     console.log(access_token)
+  //     console.log(resp)
+
+  //     var link2 = `https://wenxin.baidu.com/moduleApi/portal/api/rest/1.0/ernievilg/v1/getImg?access_token=${access_token}`
+  //     var data2 = { taskId: resp.data.taskId }
+
+  //     function checkPic(ctx) {
+  //       return new Promise((resolve, reject) => setTimeout(async () => {
+  //         ctx.http.post(link2, data2).then(resp => { resolve(resp) }, rej => { reject(rej) })
+  //       }, 5000))
+  //     }
+
+  //     var i = 1
+  //     while (resp.data.img == undefined || resp.data.img == "") {
+  //       resp = await checkPic(ctx)
+  //       i++
+  //       if (i >= 10) { _.session.send("failed"); break }
+  //       console.log("#" + i + "\n" + resp.toString())
+  //     }
+
+  //     _.session.send(segment('image', { url: resp.data.img }))
+
+
+  //   })
+
+
   ctx.command('debug', { authority: 4 })
     .action(async (_) => {
       _.session.send(_.session.guildId)
@@ -339,7 +395,7 @@ export function apply(ctx: Context, config: Config) {
     })
   ctx.command('select').alias('帮选')
 
-  ctx.command('osu', 'osu! 综合查询服务')
+  ctx.command('osu', '音游 osu! 综合查询服务')
     .action((_) => {
       if (_.session.content != "osu") { return }
       _.session.send(textHelpOsu.trim())
@@ -350,5 +406,7 @@ export function apply(ctx: Context, config: Config) {
       loadMessageListenerList()
       _.session.send(MessageListenerList.toString())
     })
+
+
 }
 
