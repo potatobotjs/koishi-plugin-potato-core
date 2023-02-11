@@ -1,5 +1,5 @@
 import { Console } from 'console'
-import { $, Bot, Channel, Context, Schema, segment } from 'koishi'
+import { $, Bot, Channel, Context, h, Schema, segment, Session } from 'koishi'
 import { genRandom, by } from './utils/other'
 import { JSONLength } from './utils/json'
 import * as pbrFile from './file'
@@ -7,19 +7,18 @@ import * as pbrCmdPotato from './potato'
 import * as pbrCmdWeird from './weird'
 import * as pbrCmdUseful from './useful'
 import * as pbrCmdAdmin from './admin'
+import * as pbrCmdMeal from './meal'
 
 export const name = 'potato-core'
 
 export interface Config {
   logGroupNumber: string
   potatoRandomIntMax: number
-  messageListenerList: string
 }
 
 export const schema = Schema.object({
   logGroupNumber: Schema.string().description("当调用 log2group 方法时，用于推送日志的群号。"),
   potatoRandomIntMax: Schema.number().description("调用获取土豆指令时最大获取的土豆数。"),
-  messageListenerList: Schema.string().description("要监听消息的 QQ 号列表，以 \",\" 分割。"),
 })
 
 
@@ -50,6 +49,12 @@ export function apply(ctx: Context, config: Config) {
 
 
 
+  //初始化
+  var _timeStarted = new Date().getTime()
+  //初始化结束
+
+
+
   //中间件
   ctx.middleware(async (session, next) => {
 
@@ -71,17 +76,17 @@ export function apply(ctx: Context, config: Config) {
 
   ctx.command('potato', '土豆er~')
 
-  ctx.command('potato/buy [potato]', '买土豆（指令别名：buyp 或 🥔）')
+  ctx.command('potato.buy [potato]', '买土豆（指令别名：buy 或 🥔）')
     .alias('🥔')
-    .alias('buyp')
+    .alias('buy')
     .action(async (_, p) => { pbrCmdPotato.buy(_, p, ctx, config) })
 
-  ctx.command('potato/eat [potato]', '吃土豆（指令别名：eatp 或 🥔🥔）')
+  ctx.command('potato.eat [potato]', '吃土豆（指令别名：eat 或 🥔🥔）')
     .alias('🥔🥔')
-    .alias('eatp')
+    .alias('eat')
     .action(async (_, p) => { pbrCmdPotato.eat(_, p, ctx, config) })
 
-  ctx.command('potato/rank [potato]', '查看本群土豆等级排名（指令别名：土豆排行榜）')
+  ctx.command('potato.rank [potato]', '查看本群土豆等级排名（指令别名：土豆排行榜）')
     .alias('土豆排行榜')
     .action(async (_, p) => { pbrCmdPotato.rank(_, p, ctx, config) })
 
@@ -89,11 +94,12 @@ export function apply(ctx: Context, config: Config) {
 
   ctx.command('meal', '吃啥？')
 
-  ctx.command('meal/what2eat', '吃啥？').alias('吃啥')
-    .action((_) => { })
+  ctx.command('meal.what2eat', '让土豆决定你吃啥')
+    .alias('吃啥')
+    .action((_) => { pbrCmdMeal.what2eat(_) })
 
-  ctx.command('meal/add <meal>', '添加菜品')
-    .action((_, m) => { })
+  ctx.command('meal.add <meal>', '添加菜品')
+    .action((_, m) => { pbrCmdMeal.add(_, m) })
 
 
 
@@ -135,6 +141,9 @@ export function apply(ctx: Context, config: Config) {
       _.session.send(pbrFile.getText('help_osu'))
     })
 
+  ctx.command('uptime', 'PotatoBot 当前会话运行时长')
+    .action((_) => { pbrCmdUseful.uptime(_, _timeStarted) })
+
   ctx.command('reload', '重载 PotatoBot 配置文件', { authority: 4 })
     .action((_) => { })
 
@@ -145,7 +154,6 @@ guildId=${_.session.guildId}
 ${pbrFile.getText('test')}
       `.trim())
     })
-
 
 
 

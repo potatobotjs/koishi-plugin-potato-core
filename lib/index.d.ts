@@ -3,16 +3,13 @@ export declare const name = "potato-core";
 export interface Config {
     logGroupNumber: string;
     potatoRandomIntMax: number;
-    messageListenerList: string;
 }
 export declare const schema: Schema<{
     logGroupNumber?: string;
     potatoRandomIntMax?: number;
-    messageListenerList?: string;
 } & import("cosmokit").Dict<any, string>, {
     logGroupNumber: string;
     potatoRandomIntMax: number;
-    messageListenerList: string;
 } & import("cosmokit").Dict<any, string>>;
 declare module 'koishi' {
     interface User {

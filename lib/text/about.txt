@@ -1,0 +1,12 @@
+ ▨ About - PotatoBot Reborn "Abelia"
+------------------------------------------
+Powered by Koishi.js,
+Written in TypeScript.
+Github: 
+https://github.com/potatobotjs/PotatoBot-Reborn
+------------------------------------------
+Credits:
+@Lingrottin    
+@RLt
+------------------------------------------
+查看指令帮助：help
